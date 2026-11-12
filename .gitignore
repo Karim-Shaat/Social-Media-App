@@ -1,0 +1,4 @@
+dev.env
+stag.env
+node_modules
+dist
