@@ -5,11 +5,12 @@ import express, {
 } from "express";
 import userRouter, {
   routes as userRoutes,
-} from "./modules/user/user.controller.js";
-import { PORT } from "./config/config.js";
-import { DBConnection } from "./DB/mongo.connection.js";
+} from "./modules/user/user.controller";
+import { PORT } from "./config/config";
+import { DBConnection } from "./DB/mongo.connection";
 import chalk from "chalk";
-import type { IError } from "./utils/error.handle.js";
+import type { IError } from "./utils/error.handle";
+import { userModel } from "./DB/models/user.model";
 
 const app = express();
 app.use(express.json());
@@ -17,8 +18,30 @@ DBConnection();
 
 app.use(userRoutes.base, userRouter);
 
+app.get("/hooks",async(req ,res)=>{
+  const user = new userModel({
+    fullName : "mohamed mohamed",
+    email: "karim@ka.com",
+    password:"karim123",
+    userName: "karim sh0aat",
+    phone: "0101010101"
+  })
+  const data = await user.save()
+  console.log(data);
+  
+  res.json(data)
+
+})
+
+
+
+
+
+
+
+
 app.use((err: IError, req: Request, res: Response, next: NextFunction) => {
-  res.status(err.statusCode).json({
+  res.status(err.statusCode || 500).json({
     msg: err.message,
     statusCode: err.statusCode,
   });

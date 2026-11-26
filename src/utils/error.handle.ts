@@ -22,3 +22,8 @@ export class badRequestException extends AppError {
         super(msg, 400)
     }
 }
+export class unAuthorizedException extends AppError {
+    constructor(msg:string = "unAuthorized"){
+        super(msg, 401)
+    }
+}

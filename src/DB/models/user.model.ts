@@ -3,11 +3,12 @@ import {
   GenderEnum,
   ProviderEnum,
   RoleEnum,
-  type iUser,
-} from "../../modules/user/user.types.js";
-import { decryption, encryption } from "../../utils/security/encryption.js";
+  type IUser,
+} from "../../modules/user/user.types";
+import { decryption, encryption } from "../../utils/security/encryption";
+import { createHash } from "../../utils/security/hash";
 
-const userSchema = new Schema<iUser>(
+const userSchema = new Schema<IUser>(
   {
     firstName: {
       type: String,
@@ -24,17 +25,17 @@ const userSchema = new Schema<iUser>(
     },
     password: {
       type: String,
-      required: function (this: iUser) {
+      required: function (this: IUser) {
         this.provider == ProviderEnum.system ? true : false;
       },
     },
     phone: {
       type: String,
       set(value: string) {
-        return encryption(value)
+        return encryption(value);
       },
       get(value: string) {
-        return decryption(value)
+        return decryption(value);
       },
     },
     age: Number,
@@ -58,7 +59,7 @@ const userSchema = new Schema<iUser>(
     bio: String,
     userName: {
       type: String,
-      required: function (this: iUser) {
+      required: function (this: IUser) {
         this.provider == ProviderEnum.system ? true : false;
       },
       //unique : true
@@ -66,6 +67,7 @@ const userSchema = new Schema<iUser>(
     confirmedAt: Date,
     blockedAt: Date,
     // otp: otpSchema
+    deletedAt: Date,
   },
   {
     timestamps: true,
@@ -76,7 +78,7 @@ const userSchema = new Schema<iUser>(
       virtuals: true,
       getters: true,
       transform(doc, ret) {
-        delete (ret as iUser & { id?: string }).id;
+        delete (ret as IUser & { id?: string }).id;
         delete ret.password;
         return ret;
       },
@@ -85,25 +87,50 @@ const userSchema = new Schema<iUser>(
       virtuals: true,
       getters: true,
       transform(doc, ret) {
-        delete (ret as iUser & { id?: string }).id;
+        delete (ret as IUser & { id?: string }).id;
         return ret;
       },
     },
     virtuals: {
       fullName: {
-        get(this: iUser) {
+        get(this: IUser) {
           return this.firstName + " " + this.lastName;
         },
-        set(this: HydratedDocument<iUser>, value: string) {
+        set(this: HydratedDocument<IUser>, value: string) {
           const [firstName, lastName] = value.split(" ");
           if (!firstName || !lastName) {
             throw new Error("in valid fullname");
           }
           (this.set("firstName", firstName), this.set("lastName", lastName));
+          
+          
         },
       },
     },
   },
 );
 
-export const userModel = model("user", userSchema);
+userSchema.pre(["find","findOne","findOneAndDelete","findOneAndUpdate"], function () {
+  let query = this.getQuery()
+  query = {
+    ...query,
+    deletedAt:{
+      $exists: false
+    }
+  }
+  this.setQuery({
+    query
+  })
+ 
+})
+
+// userSchema.pre("save",async function () {
+//   if (this.isNew || this.isModified("password")) {
+//     if (this.password) {
+//       this.password = await createHash(this.password)
+//     }
+//   }
+ 
+// })
+
+export const userModel = model<IUser>("user", userSchema);

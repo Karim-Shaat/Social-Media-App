@@ -1,5 +1,5 @@
 import z from "zod";
-import { GenderEnum } from "./user.types.js";
+import { GenderEnum } from "./user.types";
 
 export const signUpSchema = {
   body: z
@@ -21,3 +21,13 @@ export const signUpSchema = {
 };
 
 export type signUpData = z.infer<typeof signUpSchema.body>;
+
+export const logInSchema = {
+  body: z
+    .strictObject({
+      password: z.string(),
+      identifier: z.string()
+    })
+}
+
+export type logInData = z.infer<typeof logInSchema.body>;

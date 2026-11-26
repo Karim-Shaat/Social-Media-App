@@ -1,3 +1,5 @@
+import { HydratedDocument } from "mongoose";
+
 export enum GenderEnum {
   male,
   female,
@@ -11,20 +13,23 @@ export enum RoleEnum {
   admin,
 }
 
-export interface iUser {
-  firstName: String;
-  lastName: String;
-  email: String;
-  password?: String;
-  phone?: String | undefined;
+export interface IUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string;
+  phone?: string | undefined;
   age?: Number | undefined;
-  profileImage: String;
+  profileImage: string;
   gender: GenderEnum;
   provider: ProviderEnum;
   role: RoleEnum;
-  bio?: String | undefined;
-  userName?: String;
+  bio?: string | undefined;
+  userName?: string;
   confirmedAt: Date;
   blockedAt: Date;
-  fullName:String
+  deletedAt: Date,
+  fullName:string
 }
+
+export type HUser = HydratedDocument<IUser>
