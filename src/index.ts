@@ -17,6 +17,8 @@ app.use(express.json());
 DBConnection();
 
 app.use(userRoutes.base, userRouter);
+app.use("/uploads", express.static("uploads"))
+
 
 app.get("/hooks",async(req ,res)=>{
   const user = new userModel({
@@ -27,7 +29,6 @@ app.get("/hooks",async(req ,res)=>{
     phone: "0101010101"
   })
   const data = await user.save()
-  console.log(data);
   
   res.json(data)
 

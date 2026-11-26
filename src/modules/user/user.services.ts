@@ -53,7 +53,7 @@ class UserService {
     const user = await userModel.create({
       fullName: data.fullName,
       email: data.email,
-      password: await createHash(data.password),
+      password: data.password,
       gender: data.gender,
       phone: data.phone,
       bio: data.bio,

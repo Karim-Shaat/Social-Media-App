@@ -111,26 +111,22 @@ const userSchema = new Schema<IUser>(
 );
 
 userSchema.pre(["find","findOne","findOneAndDelete","findOneAndUpdate"], function () {
-  let query = this.getQuery()
-  query = {
-    ...query,
-    deletedAt:{
-      $exists: false
-    }
-  }
   this.setQuery({
-    query
-  })
+    ...this.getQuery(),
+    deletedAt: {
+      $exists: false,
+    },
+  });
  
 })
 
-// userSchema.pre("save",async function () {
-//   if (this.isNew || this.isModified("password")) {
-//     if (this.password) {
-//       this.password = await createHash(this.password)
-//     }
-//   }
+userSchema.pre("save",async function () {
+  if (this.isNew || this.isModified("password")) {
+    if (this.password) {
+      this.password = await createHash(this.password)
+    }
+  }
  
-// })
+})
 
 export const userModel = model<IUser>("user", userSchema);
