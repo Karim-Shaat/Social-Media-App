@@ -18,9 +18,10 @@ import {
 import { UserRepo } from "../../DB/repo/user.repo";
 import { userModel } from "../../DB/models/user.model";
 import jwt from "jsonwebtoken";
-import { ProviderEnum } from "./user.types";
+import { ProviderEnum, type HUser } from "./user.types";
 import { nanoid } from "nanoid";
 import { AccessToken, RefreshToken } from "../../config/config";
+import s3Service from "../../utils/aws/s3.services";
 
 
 
@@ -129,6 +130,22 @@ class UserService {
         }
     }
 }
+
+  async updateProfileImageService({ user, file }: { user: HUser; file: Express.Multer.File}) {
+
+    const path = await s3Service.uploadFile({
+      Path: `${user._id}/profile-image`,
+      file,
+    });
+    user.profileImage = path;
+    await user.save();
+
+    return {
+      data: {
+        profileImage: user.profileImage,
+      },
+    };
+  }
 
 
 }

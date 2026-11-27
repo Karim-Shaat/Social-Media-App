@@ -2,8 +2,8 @@ import { Router } from "express";
 import { UserServices } from "./user.services";
 import { successRes } from "../../utils/success.res";
 import { auth } from "../../middlewares/auth.middleware";
-import { uploadFile } from "../../utils/multer/upload.file";
-import { badRequestException, notFoundException } from "../../utils/error.handle";
+import { StorageTypeEnum, uploadFile } from "../../utils/multer/upload.file";
+import { badRequestException } from "../../utils/error.handle";
 import { HUser } from "./user.types";
 
 const router = Router();
@@ -39,22 +39,18 @@ router.get(routes.profile, auth, successRes( async (req, res)=>{
   }
 }))
 
-router.patch(routes.profileImage, auth ,uploadFile("profileImages").single("image"), successRes( async(req ,res)=>{
-  if (!req.file) {
-    throw new badRequestException("image is require");
-  }
-  const filePath = req.file.path
-  if (!req.user) {
-    throw new notFoundException();
-  }
-  
-  req.user.profileImage = filePath
-  await req.user.save()
-  
-  return{
-    data:{}
-  }
-}))
+router.patch(
+  routes.profileImage,
+  auth,
+  uploadFile({ storageType: StorageTypeEnum.memory }).single("image"),
+  successRes(async (req) => {
+    if (!req.file) {
+      throw new badRequestException("file is required");
+    }
+    const { data } = await UserServices.updateProfileImageService({user: req.user as HUser, file: req.file});
+    return { data };
+  }),
+);
 
 
 export default router;
